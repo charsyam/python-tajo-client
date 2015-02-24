@@ -1,4 +1,4 @@
-from tajorowdecoder import RowDecoder
+from rowdecoder import RowDecoder
 
 class TajoResultSet(object):
     def __init__(self):
