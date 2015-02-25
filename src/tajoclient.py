@@ -70,7 +70,7 @@ class TajoClient(TajoSessionConnection, object):
         response = self.service.getQueryResultData(request)
 
         return TajoMemoryResultSet(queryId, response.resultSet.schema,
-                                   response.resultSet.serializedTuples, fetchRowNum)
+                                   response.resultSet.serializedTuples)
 
     def getQueryResultAndWait(self, queryId):
         if self.isNullQueryId(queryId.id):
