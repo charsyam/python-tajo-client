@@ -15,7 +15,7 @@ setup(
     author_email='charsyam@gmail.com',
     classifiers=[
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache License2',
+        'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Software Development :: Libraries :: Python Modules'],
