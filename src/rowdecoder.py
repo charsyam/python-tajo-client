@@ -33,38 +33,32 @@ class RowDecoder:
         if (isNull == 1):
             return "NULL"
 
-        if (ftype == ttype.INT1):
+        if ftype == ttype.INT1:
             v = bb.read(1)
             return struct.unpack("b", v)[0]
 
-        if (ftype == ttype.INT2):
+        if ftype == ttype.INT2:
             v = bb.read(2)
             return struct.unpack(">h", v)[0]
 
-        if (ftype == ttype.INT4 or \
-            ftype == ttype.DATE):
+        if ftype == ttype.INT4 or ftype == ttype.DATE:
             v = bb.read(4)
             return struct.unpack(">i", v)[0]
 
-        if (ftype == ttype.INT8 or \
-            ftype == ttype.TIME or \
-            ftype == ttype.TIMESTAMP):
+        if ftype == ttype.INT8 or ftype == ttype.TIME or ftype == ttype.TIMESTAMP:
             v = bb.read(8)
             return struct.unpack(">q", v)[0]
 
-        if (ftype == ttype.FLOAT4):
+        if ftype == ttype.FLOAT4:
             v = bb.read(4)
             return struct.unpack(">f", v)[0]
 
-        if (ftype == ttype.FLOAT8):
+        if ftype == ttype.FLOAT8:
             v = bb.read(8)
             return struct.unpack(">d", v)[0]
 
-        if (ftype == ttype.TEXT or \
-            ftype == ttype.BLOB):
+        if ftype == ttype.TEXT or ftype == ttype.BLOB:
             l = bb.read(4)
             l2 = struct.unpack(">i", l)[0]
             v = bb.read(l2)
             return v
-
-

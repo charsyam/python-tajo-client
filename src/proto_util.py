@@ -1,4 +1,4 @@
-import google.protobuf.service
+import google.protobuf.message
 
 class ProtoUtils():
     @staticmethod
@@ -35,8 +35,8 @@ class ProtoUtils():
 
             if not (b & 0x80):
                 result &= mask
-                return (result, pos)
+                return result, pos
 
             shift += 7
             if shift >= 64:
-                raise _DecodeError('Too many bytes when decoding varint.')
+                raise google.protobuf.message.DecodeError('Too many bytes when decoding varint.')

@@ -31,17 +31,21 @@ class SocketFactory():
 
 
 class RpcChannel(google.protobuf.service.RpcChannel):
+    @staticmethod
+    def createController():
+        return Controller()
+
     def __init__(self, host, port):
         self.host = host
         self.port = port
         self.handle = SocketFactory.prepareHandle(self.host, self.port)
 
-    def readMoreN(self, handle, size):
+    def readMoreN(self, size):
         count = 0
         data = ""
         while True:
             try:
-                tmpData = handle.recv(4096)
+                tmpData = self.handle.recv(4096)
                 count += len(tmpData)
                 data += str(tmpData)
                 if count >= size:
@@ -49,20 +53,17 @@ class RpcChannel(google.protobuf.service.RpcChannel):
             except:
                 raise Exception("Socket Read Error")
 
-    def closeSocket(self, handle):
-        SocketFactory.closeSocket(handle)
+    def closeSocket(self):
+        SocketFactory.closeSocket(self.handle)
         self.handle = None
-
-    def createController(self):
-        return Controller()
 
     def prepareRequest(self, method, request):
         return None
 
-    def sendData(self, handle, packets):
+    def sendData(self, packets):
         try:
             for packet in packets:
-                handle.sendall(packet)
+                self.handle.sendall(packet)
 
         except socket.error:
             raise socket.error("packet send error")
@@ -70,7 +71,7 @@ class RpcChannel(google.protobuf.service.RpcChannel):
     def sendRequest(self, rpc_request):
         return None
 
-    def recevieResponse(self, handle):
+    def receiveResponse(self):
         return None
 
     def parseResponse(self, rpc_response, response_class):
@@ -78,11 +79,11 @@ class RpcChannel(google.protobuf.service.RpcChannel):
 
     def CallMethod(self, method, controller, request, response_class, done):
         if self.handle is None:
-            raise Exception("Connection Error(%s:%s)"%(self.host, self.port))
+            raise Exception("Connection Error(%s:%s)" % (self.host, self.port))
 
         rpc_request = self.prepareRequest(method, request)
         packets = self.sendRequest(rpc_request)
-        self.sendData(self.handle, packets)
-        rpc_response = self.recevieResponse(self.handle)
+        self.sendData(packets)
+        rpc_response = self.receiveResponse()
         response = self.parseResponse(rpc_response, response_class)
         return response

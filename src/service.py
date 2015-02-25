@@ -1,4 +1,3 @@
-from channel import RpcChannel
 
 class RpcService(object):
     def __init__(self, service_stub_cls, channel):

@@ -1,5 +1,4 @@
 import socket
-import io
 import py.RpcProtos_pb2 as rpc_pb2
 from channel import RpcChannel
 from proto_util import ProtoUtils
@@ -17,21 +16,21 @@ class TajoRpcChannel(RpcChannel):
         lenbytes = ProtoUtils.EncodeVarint(len(data))
         return [lenbytes, data]
 
-    def recevieResponse(self, handle):
+    def receiveResponse(self):
         try:
-            byte_stream = self.readMoreN(handle, 4)
+            byte_stream = self.readMoreN(4)
             v, l = ProtoUtils.DecodeVarint(byte_stream)
             byte_stream = byte_stream[l:]
             size = len(byte_stream)
             if size < (v-l):
-                byte_stream += self.readMoreN(handle, v-l)
+                byte_stream += self.readMoreN(v-l)
 
             rpc_response = rpc_pb2.RpcResponse()
             rpc_response.ParseFromString(byte_stream)
             return rpc_response
 
         except socket.error:
-            self.closeSocket(sock)
+            self.closeSocket()
             raise Exception("Error reading data from server")
 
     def parseResponse(self, rpc_response, response_class):
