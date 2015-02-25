@@ -1,12 +1,12 @@
 import sys
 sys.path.append("/Library/Python/2.7/site-packages")
 
-import py.TajoMasterClientProtocol_pb2 as TajoMasterClientProtocol_pb2
-import py.TajoIdProtos_pb2 as TajoIdProtos_pb2
-import py.ClientProtos_pb2 as ClientProtos_pb2
+import tajo.proto.TajoMasterClientProtocol_pb2 as TajoMasterClientProtocol_pb2
+import tajo.proto.TajoIdProtos_pb2 as TajoIdProtos_pb2
+import tajo.proto.ClientProtos_pb2 as ClientProtos_pb2
 
-from service import RpcService
-from tajochannel import TajoRpcChannel
+from tajo.rpc.service import RpcService
+from tajo.channel import TajoRpcChannel
 
 HOST="127.0.0.1"
 PORT=26002
