@@ -6,7 +6,7 @@ DESCRIPTION = """python tajo client
 """
 
 setup(
-    name="tajo",
+    name="tajo-client",
     version="0.0.1",
     description="a Python implementation of Tajo Client",
     long_description=DESCRIPTION,
