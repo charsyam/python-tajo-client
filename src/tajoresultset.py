@@ -1,4 +1,3 @@
-from rowdecoder import RowDecoder
 
 class TajoResultSet(object):
     def __init__(self):
@@ -11,7 +10,7 @@ class TajoResultSet(object):
         return self.cur
 
     def next(self):
-        if (self.totalRow <= 0):
+        if self.totalRow <= 0:
             return False
 
         self.cur = self.nextTuple()

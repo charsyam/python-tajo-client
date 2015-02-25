@@ -2,7 +2,6 @@ from service import RpcService
 from tajochannel import TajoRpcChannel
 
 import py.TajoMasterClientProtocol_pb2 as tajo_pb2
-import py.TajoIdProtos_pb2 as TajoIdProtos_pb2
 import py.ClientProtos_pb2 as ClientProtos_pb2
 
 class TajoSessionConnection():
@@ -13,7 +12,7 @@ class TajoSessionConnection():
         self.sessionId = None
         self.channel = TajoRpcChannel(self.host, self.port)
         self.service = RpcService(tajo_pb2.TajoMasterClientProtocolService_Stub,
-                                    self.channel)
+                                  self.channel)
 
     def createNewSessionId(self):
         request = ClientProtos_pb2.CreateSessionRequest()

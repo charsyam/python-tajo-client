@@ -1,17 +1,14 @@
-from service import RpcService
-from tajochannel import TajoRpcChannel
 from tajoconnection import TajoSessionConnection
 from tajoqueryid import QueryId
 from tajomemoryresultset import TajoMemoryResultSet
 from tajofetchresultset import TajoFetchResultSet
 
-import py.TajoMasterClientProtocol_pb2 as TajoMasterClientProtocol_pb2
-import py.TajoIdProtos_pb2 as TajoIdProtos_pb2
 import py.ClientProtos_pb2 as ClientProtos_pb2
 import py.CatalogProtos_pb2 as CatalogProtos_pb2
 
 OK_VALUE = 0
 ERROR_VALUE = 1
+
 
 class TajoClient(TajoSessionConnection, object):
     def __init__(self, host, port, username='tmpuser'):
@@ -32,7 +29,7 @@ class TajoClient(TajoSessionConnection, object):
 
     def createNullResultSet(self, queryId):
         return TajoMemoryResultSet(queryId, CatalogProtos_pb2.SchemaProto,
-                             None, 0)
+                                   None, 0)
 
     def isNullQueryId(self, queryId):
         return queryId == QueryId.NULL_QUERY_ID
@@ -42,7 +39,7 @@ class TajoClient(TajoSessionConnection, object):
             return TajoFetchResultSet(self, response.queryId, 5)
         else:
             return TajoMemoryResultSet(response.queryId, response.resultSet.schema,
-                             response.resultSet.serializedTuples, fetchRowNum)
+                                       response.resultSet.serializedTuples, fetchRowNum)
 
     def executeQueryAndGetResult(self, sql):
         response = self.executeQuery(sql)
@@ -73,7 +70,7 @@ class TajoClient(TajoSessionConnection, object):
         response = self.service.getQueryResultData(request)
 
         return TajoMemoryResultSet(queryId, response.resultSet.schema,
-                             response.resultSet.serializedTuples, fetchRowNum)
+                                   response.resultSet.serializedTuples, fetchRowNum)
 
     def getQueryResultAndWait(self, queryId):
         if self.isNullQueryId(queryId.id):

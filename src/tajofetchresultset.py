@@ -24,8 +24,7 @@ class TajoFetchResultSet(TajoResultSet):
             self.resultSet.next()
             t = self.resultSet.getCurrentTuple()
 
-        if (self.resultSet is None) or \
-            (t is None):
+        if self.resultSet is None or t is None:
             self.resultSet = self.client.fetchNextQueryResult(self.queryId, self.fetchRowNum)
             if self.resultSet is None:
                 self.finished = True
