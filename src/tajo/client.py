@@ -5,12 +5,14 @@ from fetchresultset import TajoFetchResultSet
 
 import proto.ClientProtos_pb2 as ClientProtos_pb2
 import proto.CatalogProtos_pb2 as CatalogProtos_pb2
-from proto.tajo_protos_pb2 import QueryState
+from querystate import QueryState
 
 import time
 
 OK_VALUE = 0
 ERROR_VALUE = 1
+
+FETCH_ROW_NUM = 10
 
 class TajoClient(TajoSessionConnection, object):
     def __init__(self, host, port, username='tmpuser'):
@@ -25,32 +27,32 @@ class TajoClient(TajoSessionConnection, object):
 
     def getQueryStatus(self, queryId):
         request = ClientProtos_pb2.GetQueryStatusRequest()
+        request.sessionId.id = self.checkSessionAndGet()
         request.queryId.id = queryId.id
         request.queryId.seq = queryId.seq
         return self.service.getQueryStatus(request)
 
     def createNullResultSet(self, queryId):
-        return TajoMemoryResultSet(queryId, CatalogProtos_pb2.SchemaProto,
-                                   None, 0)
+        return TajoMemoryResultSet(queryId, CatalogProtos_pb2.SchemaProto(), [])
 
     def isNullQueryId(self, queryId):
         return queryId == QueryId.NULL_QUERY_ID
 
     def createResultSet(self, response, fetchRowNum):
         if response.HasField('tableDesc'):
-            return TajoFetchResultSet(self, response.queryId, 5)
+            return TajoFetchResultSet(self, response.queryId, FETCH_ROW_NUM)
         else:
             return TajoMemoryResultSet(response.queryId, response.resultSet.schema,
-                                       response.resultSet.serializedTuples, fetchRowNum)
+                                       response.resultSet.serializedTuples)
 
     def executeQueryAndGetResult(self, sql):
         response = self.executeQuery(sql)
-        if response.resultCode == ERROR_VALUE:
-            raise Exception(response.errorMessage)
+        if self.isError(response.resultCode):
+            raise Exception(response.errorMessage + " " + response.errorTrace)
 
         queryId = response.queryId
         if response.isForwarded is True:
-            if queryId.id == QueryId.NULL_QUERY_ID:
+            if self.isNullQueryId(queryId.id):
                 return self.createNullResultSet(queryId)
             else:
                 return self.getQueryResultAndWait(queryId)
@@ -63,6 +65,9 @@ class TajoClient(TajoSessionConnection, object):
 
         return self.createResultSet(response, 10)
 
+    def isError(self, code):
+        return code == ERROR_VALUE
+
     def fetchNextQueryResult(self, queryId, fetchRowNum):
         request = ClientProtos_pb2.GetQueryResultDataRequest()
         request.sessionId.id = self.checkSessionAndGet()
@@ -70,6 +75,8 @@ class TajoClient(TajoSessionConnection, object):
         request.queryId.seq = queryId.seq
         request.fetchRowNum = fetchRowNum
         response = self.service.getQueryResultData(request)
+        if self.isError(response.resultCode):
+            raise Exception(response.errorMessage + " " + response.errorTrace)
 
         return TajoMemoryResultSet(queryId, response.resultSet.schema,
                                    response.resultSet.serializedTuples)
@@ -94,12 +101,12 @@ class TajoClient(TajoSessionConnection, object):
             return self.createNullResultSet(queryId)
 
         status = self.getQueryStatus(queryId)
-        while (status != None and self.isQueryComplete(status.state)):
+        while (status != None and self.isQueryComplete(status.state) == False):
             time.sleep(1)
             status = self.getQueryStatus(queryId)
 
         if status.state == QueryState.QUERY_SUCCEEDED:
-            if status.hasResult():
+            if status.hasResult:
                 return self.getQueryResult(queryId);
 
         return self.createNullResultSet(queryId);
@@ -108,13 +115,12 @@ class TajoClient(TajoSessionConnection, object):
         if self.isNullQueryId(queryId):
             return self.createNullResultSet(queryId)
 
-        response = getResultResponse(queryId)
-        return TajoFetchResultSet(self, response.queryId, 5)
+        response = self.getResultResponse(queryId)
+        return TajoFetchResultSet(self, queryId, FETCH_ROW_NUM)
 
     def getResultResponse(self, queryId):
         request = ClientProtos_pb2.GetQueryResultRequest()
         request.sessionId.id = self.checkSessionAndGet()
         request.queryId.id = queryId.id
         request.queryId.seq = queryId.seq
-        request.fetchRowNum = fetchRowNum
         return self.service.getQueryResult(request)
