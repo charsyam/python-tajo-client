@@ -38,9 +38,27 @@ class TajoClient(TajoSessionConnection, object):
     def isNullQueryId(self, queryId):
         return queryId == QueryId.NULL_QUERY_ID
 
+    def getLogicalSchema(self, tableDesc):
+        import pdb; pdb.set_trace()
+        schema = tableDesc.schema
+        if tableDesc.HasField('partition'):
+            partition = tableDesc.partition
+            start = len(schema.fields)
+            count = 0
+            for field in partition.expressionSchema.fields:
+                new_field = schema.fields.add()
+                new_field.tid = field.tid
+                new_field.name = field.name
+                new_field.dataType.type = field.dataType.type
+                new_field.dataType.code = field.dataType.code
+                new_field.dataType.length = field.dataType.length
+
+        return schema
+
     def createResultSet(self, response, fetchRowNum):
         if response.HasField('tableDesc'):
-            return TajoFetchResultSet(self, response.queryId, FETCH_ROW_NUM)
+            return TajoFetchResultSet(self, response.queryId,
+                    self.getLogicalSchema(response.tableDesc), FETCH_ROW_NUM)
         else:
             return TajoMemoryResultSet(response.queryId, response.resultSet.schema,
                                        response.resultSet.serializedTuples)
@@ -68,7 +86,7 @@ class TajoClient(TajoSessionConnection, object):
     def isError(self, code):
         return code == ERROR_VALUE
 
-    def fetchNextQueryResult(self, queryId, fetchRowNum):
+    def fetchNextQueryResult(self, queryId, schema, fetchRowNum):
         request = ClientProtos_pb2.GetQueryResultDataRequest()
         request.sessionId.id = self.checkSessionAndGet()
         request.queryId.id = queryId.id
@@ -78,7 +96,7 @@ class TajoClient(TajoSessionConnection, object):
         if self.isError(response.resultCode):
             raise Exception(response.errorMessage + " " + response.errorTrace)
 
-        return TajoMemoryResultSet(queryId, response.resultSet.schema,
+        return TajoMemoryResultSet(queryId, schema,
                                    response.resultSet.serializedTuples)
 
     def isQueryWaitingForSchedule(self, state):
@@ -116,7 +134,8 @@ class TajoClient(TajoSessionConnection, object):
             return self.createNullResultSet(queryId)
 
         response = self.getResultResponse(queryId)
-        return TajoFetchResultSet(self, queryId, FETCH_ROW_NUM)
+        return TajoFetchResultSet(self, queryId,
+                self.getLogicalSchema(response.tableDesc), FETCH_ROW_NUM)
 
     def getResultResponse(self, queryId):
         request = ClientProtos_pb2.GetQueryResultRequest()
