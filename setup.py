@@ -6,14 +6,11 @@ import sys
 DESCRIPTION = """python tajo client
 """
 
-if sys.version_info >= (3,0):
-    install_requires = ["python3-protobuf==2.5.0"]
-else:
-    install_requires = ["protobuf==2.5.0"]
+install_requires = ["protobuf==2.5.0"]
 
 setup(
     name="tajo-client",
-    version="0.0.3",
+    version="0.0.4",
     description="a Python implementation of Tajo Client",
     long_description=DESCRIPTION,
     url='http://github.com/charsyam/python-tajo-client/',
