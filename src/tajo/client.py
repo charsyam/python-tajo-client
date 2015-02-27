@@ -39,7 +39,6 @@ class TajoClient(TajoSessionConnection, object):
         return queryId == QueryId.NULL_QUERY_ID
 
     def getLogicalSchema(self, tableDesc):
-        import pdb; pdb.set_trace()
         schema = tableDesc.schema
         if tableDesc.HasField('partition'):
             partition = tableDesc.partition

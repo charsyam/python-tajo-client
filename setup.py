@@ -10,7 +10,7 @@ install_requires = ["protobuf==2.5.0"]
 
 setup(
     name="tajo-client",
-    version="0.0.5",
+    version="0.0.6",
     description="a Python implementation of Tajo Client",
     long_description=DESCRIPTION,
     url='http://github.com/charsyam/python-tajo-client/',
