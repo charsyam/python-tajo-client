@@ -6,7 +6,7 @@ import sys
 DESCRIPTION = """python tajo client
 """
 
-install_requires = ["protobuf==2.5.0"]
+install_requires = ["protobuf==3.18.3"]
 
 setup(
     name="tajo-client",
